@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 const app = express();
 app.use(express.json());
 
+console.log("Clé API:", process.env.ANTHROPIC_API_KEY ? "présente" : "ABSENTE");
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const conversations = new Map();
