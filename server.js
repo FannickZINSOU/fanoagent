@@ -4,7 +4,10 @@ import Anthropic from "@anthropic-ai/sdk";
 const app = express();
 app.use(express.json());
 
-console.log("Clé API:", process.env.ANTHROPIC_API_KEY ? "présente" : "ABSENTE");
+console.log("Clé API: PRESENTE EN DUR");
+const anthropic = new Anthropic({ 
+  apiKey: "sk-ant-api03-..."
+});
 const anthropic = new Anthropic({ 
   apiKey: "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"
 });
