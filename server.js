@@ -5,7 +5,9 @@ const app = express();
 app.use(express.json());
 
 console.log("Clé API:", process.env.ANTHROPIC_API_KEY ? "présente" : "ABSENTE");
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const anthropic = new Anthropic({ 
+  apiKey: "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"
+});
 
 const conversations = new Map();
 const MAX_HISTORY = 20;
