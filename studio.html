@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OBSIDIAN — Studio Photographique de Luxe</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --gold: #c9a84c;
+  --gold-light: #e8c96a;
+  --gold-dim: rgba(201,168,76,0.15);
+  --bg: #000;
+  --surface: #0d0d0d;
+  --surface2: #141414;
+  --border: rgba(255,255,255,0.06);
+  --text: #fafafa;
+  --muted: rgba(255,255,255,0.45);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { overflow-x: hidden; }
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  cursor: none;
+  overflow-x: hidden;
+}
+h1,h2,h3,h4 { font-family: 'Archivo', sans-serif; }
+
+/* ── Custom Cursor ── */
+#cursor { position: fixed; width: 8px; height: 8px; background: #fff; border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: width .25s, height .25s, background .25s, opacity .25s; mix-blend-mode: difference; }
+#cursor-ring { position: fixed; width: 36px; height: 36px; border: 1px solid rgba(255,255,255,0.4); border-radius: 50%; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); transition: width .4s cubic-bezier(.25,.46,.45,.94), height .4s, border-color .3s, opacity .4s; }
+body:hover #cursor { opacity: 1; }
+.cursor-grow ~ #cursor, .cursor-grow ~ #cursor-ring { width: 60px; height: 60px; }
+
+/* ── Progress bar ── */
+#progress { position: fixed; top: 0; left: 0; height: 1px; background: linear-gradient(90deg, var(--gold), var(--gold-light)); z-index: 200; transition: width .1s linear; }
+
+/* ── Grain ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity: 0.4; mix-blend-mode: overlay;
+}
+
+/* ── Glass ── */
+.glass { background: rgba(255,255,255,0.03); backdrop-filter: blur(24px) saturate(160%); -webkit-backdrop-filter: blur(24px) saturate(160%); border: 1px solid var(--border); }
+.glass-gold { background: rgba(201,168,76,0.06); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(201,168,76,0.18); }
+
+/* ── Nav ── */
+nav { position: fixed; top: 12px; left: 12px; right: 12px; z-index: 100; border-radius: 18px; transition: background .3s; }
+nav.scrolled { background: rgba(0,0,0,0.7) !important; backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); }
+
+/* ── Hero ── */
+.hero-bg {
+  background: radial-gradient(ellipse 100% 70% at 50% 30%, rgba(201,168,76,0.07) 0%, transparent 55%),
+              radial-gradient(ellipse 50% 50% at 80% 10%, rgba(255,255,255,0.03) 0%, transparent 50%),
+              radial-gradient(ellipse 60% 80% at 20% 80%, rgba(201,168,76,0.04) 0%, transparent 50%),
+              #000;
+}
+.hero-text {
+  font-family: 'Archivo', sans-serif;
+  font-size: clamp(3.8rem, 11vw, 11rem);
+  font-weight: 900;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+}
+.hero-sub { font-family: 'Archivo', sans-serif; font-size: clamp(2rem, 5vw, 4.5rem); font-weight: 300; letter-spacing: 0.02em; }
+
+/* ── Gold text ── */
+.gold { background: linear-gradient(135deg, #c9a84c 0%, #e8c96a 40%, #b8912e 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.gold-line { height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+
+/* ── Parallax container ── */
+.parallax-layer { will-change: transform; }
+
+/* ── Reveal animations ── */
+.reveal { opacity: 0; transform: translateY(40px); transition: opacity .8s cubic-bezier(.25,.46,.45,.94), transform .8s cubic-bezier(.25,.46,.45,.94); }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-left { opacity: 0; transform: translateX(-50px); transition: opacity .9s ease, transform .9s ease; }
+.reveal-left.visible { opacity: 1; transform: none; }
+.reveal-right { opacity: 0; transform: translateX(50px); transition: opacity .9s ease, transform .9s ease; }
+.reveal-right.visible { opacity: 1; transform: none; }
+.stagger > * { opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
+.stagger.visible > *:nth-child(1) { opacity:1; transform:none; transition-delay:.05s; }
+.stagger.visible > *:nth-child(2) { opacity:1; transform:none; transition-delay:.15s; }
+.stagger.visible > *:nth-child(3) { opacity:1; transform:none; transition-delay:.25s; }
+.stagger.visible > *:nth-child(4) { opacity:1; transform:none; transition-delay:.35s; }
+.stagger.visible > *:nth-child(5) { opacity:1; transform:none; transition-delay:.45s; }
+.stagger.visible > *:nth-child(6) { opacity:1; transform:none; transition-delay:.55s; }
+
+/* ── Text scramble ── */
+.scramble { font-family: 'Archivo', monospace; }
+
+/* ── Portfolio masonry ── */
+.masonry { columns: 2; column-gap: 12px; }
+@media (min-width: 768px) { .masonry { columns: 3; column-gap: 16px; } }
+.masonry-item { break-inside: avoid; margin-bottom: 12px; position: relative; overflow: hidden; border-radius: 12px; cursor: pointer; }
+@media (min-width: 768px) { .masonry-item { margin-bottom: 16px; } }
+.masonry-item:hover .overlay { opacity: 1; }
+.masonry-item:hover img, .masonry-item:hover .img-placeholder { transform: scale(1.05); }
+.img-placeholder { transition: transform .5s cubic-bezier(.25,.46,.45,.94); }
+.overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.85) 0%, transparent 60%); opacity: 0; transition: opacity .35s ease; display: flex; align-items: flex-end; padding: 20px; }
+.masonry-item { transition: box-shadow .3s ease; }
+.masonry-item:hover { box-shadow: 0 20px 60px rgba(0,0,0,.7), 0 0 0 1px rgba(201,168,76,.25); }
+
+/* ── Service cards ── */
+.svc-card { transition: all .3s cubic-bezier(.25,.46,.45,.94); cursor: pointer; position: relative; overflow: hidden; }
+.svc-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at top, rgba(201,168,76,0.08), transparent 70%); opacity: 0; transition: opacity .4s; }
+.svc-card:hover::before { opacity: 1; }
+.svc-card:hover { transform: translateY(-6px); border-color: rgba(201,168,76,.3) !important; box-shadow: 0 24px 60px rgba(0,0,0,.5), 0 0 0 1px rgba(201,168,76,.15); }
+.svc-card.featured { border-color: rgba(201,168,76,.25) !important; }
+
+/* ── Inputs ── */
+input, textarea, select {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fafafa;
+  border-radius: 10px;
+  padding: 15px 18px;
+  width: 100%;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  outline: none;
+  transition: border-color .25s, background .25s, box-shadow .25s;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: rgba(201,168,76,.5);
+  background: rgba(255,255,255,.06);
+  box-shadow: 0 0 0 3px rgba(201,168,76,.08);
+}
+input::placeholder, textarea::placeholder { color: rgba(255,255,255,.25); }
+select option { background: #1a1a1a; }
+label { display: block; font-size: 11px; font-weight: 500; color: rgba(255,255,255,.4); margin-bottom: 7px; letter-spacing: .1em; text-transform: uppercase; }
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(.5); cursor: pointer; }
+input[type="checkbox"] { width: auto; cursor: pointer; accent-color: var(--gold); }
+
+/* ── Buttons ── */
+.btn-gold {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #c9a84c, #b8912e);
+  color: #000; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; font-size: 12px;
+  padding: 16px 32px; border-radius: 10px; border: none; cursor: pointer;
+  transition: opacity .2s, transform .2s, box-shadow .2s;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.btn-gold:hover { opacity: .9; transform: translateY(-2px); box-shadow: 0 10px 40px rgba(201,168,76,.35); }
+.btn-gold:active { transform: translateY(0); }
+.btn-outline {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; border: 1px solid rgba(255,255,255,.18); color: #fff;
+  padding: 14px 28px; border-radius: 10px; cursor: pointer; font-size: 13px;
+  font-family: 'Space Grotesk', sans-serif;
+  transition: all .2s;
+}
+.btn-outline:hover { border-color: rgba(255,255,255,.5); background: rgba(255,255,255,.05); }
+
+/* ── Stats ── */
+.stat-num { font-family: 'Archivo', sans-serif; font-size: clamp(2.8rem,5vw,5rem); font-weight: 300; line-height: 1; }
+
+/* ── Steps ── */
+.step-dot { width: 40px; height: 40px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,.3); display: flex; align-items: center; justify-content: center; font-family: 'Archivo', sans-serif; font-size: 14px; font-weight: 700; color: var(--gold); flex-shrink: 0; }
+.step-line { width: 1px; background: linear-gradient(to bottom, rgba(201,168,76,.3), transparent); flex: 1; min-height: 40px; margin-left: 19px; }
+
+/* ── Lightbox ── */
+#lightbox { position: fixed; inset: 0; z-index: 500; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+#lightbox.open { display: flex; }
+#lightbox-content { max-width: 90vw; max-height: 90vh; border-radius: 12px; overflow: hidden; box-shadow: 0 40px 120px rgba(0,0,0,.9); }
+#lightbox-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,.1); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s; }
+#lightbox-close:hover { background: rgba(255,255,255,.2); }
+
+/* ── Order Modal ── */
+#order-modal { position: fixed; inset: 0; z-index: 400; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); padding: 16px; }
+#order-modal.open { display: flex; }
+#order-box { width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; border-radius: 24px; }
+#order-box::-webkit-scrollbar { width: 4px; }
+#order-box::-webkit-scrollbar-thumb { background: rgba(201,168,76,.3); border-radius: 2px; }
+
+/* ── Step wizard ── */
+.wizard-step { display: none; }
+.wizard-step.active { display: block; }
+.step-indicator { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.2); transition: all .3s; }
+.step-indicator.done { background: var(--gold); }
+.step-indicator.active { background: #fff; width: 24px; border-radius: 4px; }
+
+/* ── Testimonial ── */
+.testimonial-track { display: flex; gap: 20px; transition: transform .5s cubic-bezier(.25,.46,.45,.94); }
+.testimonial-card { min-width: 360px; flex-shrink: 0; }
+@media (max-width: 640px) { .testimonial-card { min-width: 280px; } }
+
+/* ── Floating CTA ── */
+#floating-cta { position: fixed; bottom: 24px; right: 24px; z-index: 90; transform: translateY(80px); opacity: 0; transition: all .4s cubic-bezier(.25,.46,.45,.94); }
+#floating-cta.show { transform: none; opacity: 1; }
+
+/* ── Toast ── */
+#toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); z-index: 600; opacity: 0; pointer-events: none; transition: all .4s ease; white-space: nowrap; }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Marquee ── */
+.marquee-wrap { overflow: hidden; }
+.marquee-inner { display: flex; width: max-content; animation: marquee 20s linear infinite; }
+@keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+.marquee-wrap:hover .marquee-inner { animation-play-state: paused; }
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .reveal, .reveal-left, .reveal-right, .stagger > *, .svc-card, .masonry-item .img-placeholder { transition: none !important; }
+  .marquee-inner { animation: none; }
+  #cursor, #cursor-ring { display: none; }
+  body { cursor: auto; }
+}
+
+/* ── Mobile menu ── */
+#mobile-nav { display: none; }
+#mobile-nav.open { display: block; }
+
+/* ── Tag badge ── */
+.tag { display: inline-flex; align-items: center; gap: 6px; background: var(--gold-dim); border: 1px solid rgba(201,168,76,.25); color: var(--gold); font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; padding: 5px 12px; border-radius: 100px; }
+
+/* ── Error state ── */
+.input-error { border-color: rgba(248,113,113,.5) !important; }
+.error-msg { color: #f87171; font-size: 11px; margin-top: 5px; display: none; }
+.error-msg.show { display: block; }
+</style>
+</head>
+<body>
+<!-- Custom cursor -->
+<div id="cursor" aria-hidden="true"></div>
+<div id="cursor-ring" aria-hidden="true"></div>
+<!-- Progress bar -->
+<div id="progress" aria-hidden="true"></div>
+
+<!-- ═══════════════════════════ NAV ═══════════════════════════ -->
+<nav class="glass" id="navbar" aria-label="Navigation principale">
+  <div class="flex items-center justify-between px-5 py-4">
+    <a href="#hero" class="text-xl font-black tracking-[.2em] uppercase gold cursor-pointer" style="font-family:'Archivo',sans-serif;">OBSIDIAN</a>
+    <div class="hidden md:flex items-center gap-7">
+      <a href="#portfolio" class="text-sm text-white/50 hover:text-white transition-colors duration-200 cursor-pointer tracking-wide">Portfolio</a>
+      <a href="#services" class="text-sm text-white/50 hover:text-white transition-colors duration-200 cursor-pointer tracking-wide">Services</a>
+      <a href="#process" class="text-sm text-white/50 hover:text-white transition-colors duration-200 cursor-pointer tracking-wide">Processus</a>
+      <a href="#contact" class="text-sm text-white/50 hover:text-white transition-colors duration-200 cursor-pointer tracking-wide">Contact</a>
+      <button onclick="openOrder()" class="btn-gold py-3 px-5 text-xs">Commander</button>
+    </div>
+    <button id="menu-btn" class="md:hidden p-2 cursor-pointer" aria-label="Menu" aria-expanded="false">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+    </button>
+  </div>
+  <div id="mobile-nav" class="md:hidden px-5 pb-5 border-t border-white/[.06] pt-4 space-y-3">
+    <a href="#portfolio" class="block text-white/60 hover:text-white py-1 cursor-pointer">Portfolio</a>
+    <a href="#services" class="block text-white/60 hover:text-white py-1 cursor-pointer">Services</a>
+    <a href="#process" class="block text-white/60 hover:text-white py-1 cursor-pointer">Processus</a>
+    <a href="#contact" class="block text-white/60 hover:text-white py-1 cursor-pointer">Contact</a>
+    <button onclick="openOrder()" class="btn-gold w-full justify-center mt-2">Commander une séance</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════ HERO ═══════════════════════════ -->
+<section id="hero" class="hero-bg min-h-screen flex flex-col justify-center relative overflow-hidden pt-28 pb-20">
+  <!-- Parallax orbs -->
+  <div class="parallax-layer absolute top-[15%] left-[8%] w-72 h-72 rounded-full blur-3xl pointer-events-none" style="background:radial-gradient(circle,rgba(201,168,76,.06),transparent 70%);" data-speed="0.3" aria-hidden="true"></div>
+  <div class="parallax-layer absolute bottom-[20%] right-[5%] w-96 h-96 rounded-full blur-3xl pointer-events-none" style="background:radial-gradient(circle,rgba(255,255,255,.03),transparent 70%);" data-speed="0.5" aria-hidden="true"></div>
+  <div class="parallax-layer absolute top-[50%] right-[20%] w-48 h-48 rounded-full blur-2xl pointer-events-none" style="background:radial-gradient(circle,rgba(201,168,76,.04),transparent 70%);" data-speed="0.2" aria-hidden="true"></div>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-6 w-full">
+    <div class="reveal">
+      <div class="tag mb-8">
+        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/></svg>
+        Studio basé à Paris · Disponible France entière
+      </div>
+    </div>
+    <h1 class="hero-text text-white reveal mb-4" style="transition-delay:.1s">
+      L'IMAGE<br/>
+      <span class="gold">PARFAITE</span><br/>
+      <span style="font-weight:300; font-style:italic; font-size:.75em;">commence ici.</span>
+    </h1>
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mt-12">
+      <p class="text-white/50 max-w-md leading-relaxed reveal" style="font-size:1.05rem; transition-delay:.2s;">
+        Photographie de luxe pour portraits, mariages et identités visuelles de marque. Chaque séance est une œuvre.
+      </p>
+      <div class="flex flex-wrap gap-4 reveal" style="transition-delay:.3s">
+        <button onclick="openOrder()" class="btn-gold">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.269 20.876L5.999 12zm0 0h7.5"/></svg>
+          Passer une commande
+        </button>
+        <a href="#portfolio" class="btn-outline">
+          Voir le portfolio
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll hint -->
+  <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 reveal" style="transition-delay:.5s" aria-hidden="true">
+    <span class="text-white/20 text-[10px] tracking-[.3em] uppercase">Défiler</span>
+    <div class="w-px h-12 bg-gradient-to-b from-white/30 to-transparent"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ MARQUEE ═══════════════════════════ -->
+<div class="py-6 border-y border-white/[.05] overflow-hidden" aria-hidden="true">
+  <div class="marquee-wrap">
+    <div class="marquee-inner text-white/10 text-sm font-medium tracking-[.2em] uppercase select-none">
+      <span class="px-8">Portrait</span><span class="px-2 text-[#c9a84c]">·</span>
+      <span class="px-8">Mariage</span><span class="px-2 text-[#c9a84c]">·</span>
+      <span class="px-8">Corporate</span><span class="px-2 text-[#c9a84c]">·</span>
+      <span class="px-8">Mode</span><span class="px-2 text-[#c9a84c]">·</span>
+      <span class="px-8">Immobilier</span><span class="px-2 text-[#c9a84c]">·</span>
+      <span class="px-8">Événement</span><span class="px-2 text-[#c9a84c]">·</span>
+      <span class="px-8">Art</span><span class="px-2 text-[#c9a84c]">·</span>
+      <span class="px-8">Gastronomie</span><span class="px-2 text-[#c9a84c]">·</span>
+      <!-- repeat -->
+      <span class="px-8">Portrait</span><span class="px-2 text-[#c9a84c]">·</span>
+      <span class="px-8">Mariage</span><span class="px-2 text-[#c9a84c]">·</span>
+      <span class="px-8">Corporate</span><span class="px-2 text-[#c9a84c]">·</span>
+      <span class="px-8">Mode</span><span class="px-2 text-[#c9a84c]">·</span>
+      <span class="px-8">Immobilier</span><span class="px-2 text-[#c9a84c]">·</span>
+      <span class="px-8">Événement</span><span class="px-2 text-[#c9a84c]">·</span>
+      <span class="px-8">Art</span><span class="px-2 text-[#c9a84c]">·</span>
+      <span class="px-8">Gastronomie</span><span class="px-2 text-[#c9a84c]">·</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ STATS ═══════════════════════════ -->
+<section class="py-20 relative z-10">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 stagger" id="stats-grid">
+      <div class="text-center">
+        <div class="stat-num gold" data-count="1200">0</div>
+        <div class="text-white/30 text-xs tracking-[.15em] uppercase mt-2">Séances réalisées</div>
+      </div>
+      <div class="text-center">
+        <div class="stat-num gold" data-count="15">0</div>
+        <div class="text-white/30 text-xs tracking-[.15em] uppercase mt-2">Années d'expérience</div>
+      </div>
+      <div class="text-center">
+        <div class="stat-num gold" data-count="98">0</div>
+        <div class="text-white/30 text-xs tracking-[.15em] uppercase mt-2">% satisfaction</div>
+      </div>
+      <div class="text-center">
+        <div class="stat-num gold" data-count="56">0</div>
+        <div class="text-white/30 text-xs tracking-[.15em] uppercase mt-2">Prix remportés</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ PORTFOLIO ═══════════════════════════ -->
+<section id="portfolio" class="py-24 relative z-10">
+  <div class="max-w-6xl mx-auto px-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+      <div class="reveal">
+        <p class="text-[10px] tracking-[.4em] text-white/25 uppercase mb-3">Galerie</p>
+        <h2 style="font-family:'Archivo',sans-serif; font-size:clamp(2.5rem,5vw,4rem); font-weight:700; line-height:1.05;">
+          Portfolio<br/><span class="gold" style="font-weight:300;font-style:italic;">sélectionné</span>
+        </h2>
+      </div>
+      <!-- Filters -->
+      <div class="flex flex-wrap gap-2 reveal" role="group" aria-label="Filtres portfolio">
+        <button onclick="filter('all',this)" class="filter-btn active-f text-xs tracking-widest uppercase py-2 px-4 rounded-full border border-white/15 cursor-pointer transition-all duration-200 hover:border-white/40">Tout</button>
+        <button onclick="filter('portrait',this)" class="filter-btn text-xs tracking-widest uppercase py-2 px-4 rounded-full border border-white/10 cursor-pointer transition-all duration-200 hover:border-white/40">Portrait</button>
+        <button onclick="filter('mariage',this)" class="filter-btn text-xs tracking-widest uppercase py-2 px-4 rounded-full border border-white/10 cursor-pointer transition-all duration-200 hover:border-white/40">Mariage</button>
+        <button onclick="filter('corporate',this)" class="filter-btn text-xs tracking-widest uppercase py-2 px-4 rounded-full border border-white/10 cursor-pointer transition-all duration-200 hover:border-white/40">Corporate</button>
+        <button onclick="filter('art',this)" class="filter-btn text-xs tracking-widest uppercase py-2 px-4 rounded-full border border-white/10 cursor-pointer transition-all duration-200 hover:border-white/40">Art</button>
+      </div>
+    </div>
+
+    <!-- Masonry grid -->
+    <div class="masonry reveal" id="masonry">
+      <!-- Portrait tall -->
+      <div class="masonry-item" data-cat="portrait" tabindex="0" role="button" aria-label="Ouvrir Portrait éclipse" onclick="openLightbox(this)">
+        <div class="img-placeholder" style="height:420px; background:linear-gradient(160deg,#0d0d0d 0%,#1c1c2e 40%,#0f0f2a 100%); position:relative;">
+          <div style="position:absolute;top:15%;left:20%;right:20%;bottom:20%;background:radial-gradient(ellipse,rgba(201,168,76,.18) 0%,transparent 65%);border-radius:50%;"></div>
+          <div style="position:absolute;bottom:0;left:0;right:0;height:60%;background:linear-gradient(to top,rgba(0,0,0,.6),transparent);"></div>
+        </div>
+        <div class="overlay"><div><div class="text-xs tracking-widest uppercase text-white/50 mb-1">Portrait</div><div class="font-semibold text-sm" style="font-family:'Archivo',sans-serif;">Éclipse Dorée</div></div></div>
+      </div>
+
+      <!-- Mariage square -->
+      <div class="masonry-item" data-cat="mariage" tabindex="0" role="button" aria-label="Ouvrir Mariage lumière" onclick="openLightbox(this)">
+        <div class="img-placeholder" style="height:220px; background:linear-gradient(135deg,#1a0d2e 0%,#2d1458 60%,#1a0a40 100%); position:relative;">
+          <div style="position:absolute;inset:0;background:radial-gradient(circle at 60% 40%,rgba(201,168,76,.15),transparent 55%);"></div>
+        </div>
+        <div class="overlay"><div><div class="text-xs tracking-widest uppercase text-white/50 mb-1">Mariage</div><div class="font-semibold text-sm" style="font-family:'Archivo',sans-serif;">Lumière Éternelle</div></div></div>
+      </div>
+
+      <!-- Corporate square -->
+      <div class="masonry-item" data-cat="corporate" tabindex="0" role="button" aria-label="Ouvrir Corporate" onclick="openLightbox(this)">
+        <div class="img-placeholder" style="height:180px; background:linear-gradient(160deg,#0a0a0a 0%,#1a1a2a 100%); position:relative;">
+          <div style="position:absolute;top:10%;left:10%;right:50%;bottom:10%;background:linear-gradient(135deg,rgba(201,168,76,.1),transparent);border-radius:8px;"></div>
+        </div>
+        <div class="overlay"><div><div class="text-xs tracking-widest uppercase text-white/50 mb-1">Corporate</div><div class="font-semibold text-sm" style="font-family:'Archivo',sans-serif;">Identité de Marque</div></div></div>
+      </div>
+
+      <!-- Art tall -->
+      <div class="masonry-item" data-cat="art" tabindex="0" role="button" aria-label="Ouvrir Art" onclick="openLightbox(this)">
+        <div class="img-placeholder" style="height:340px; background:linear-gradient(180deg,#000 0%,#0d0d0d 30%,#1a1204 100%); position:relative;">
+          <div style="position:absolute;top:20%;left:30%;right:30%;height:30%;background:radial-gradient(ellipse,rgba(201,168,76,.25),transparent 70%);"></div>
+          <div style="position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(to top,rgba(201,168,76,.05),transparent);"></div>
+        </div>
+        <div class="overlay"><div><div class="text-xs tracking-widest uppercase text-white/50 mb-1">Art</div><div class="font-semibold text-sm" style="font-family:'Archivo',sans-serif;">Lumière Fractale</div></div></div>
+      </div>
+
+      <!-- Portrait square -->
+      <div class="masonry-item" data-cat="portrait" tabindex="0" role="button" aria-label="Ouvrir Portrait" onclick="openLightbox(this)">
+        <div class="img-placeholder" style="height:250px; background:linear-gradient(135deg,#14141e 0%,#1e1e30 100%); position:relative;">
+          <div style="position:absolute;top:0;right:0;width:60%;height:60%;background:radial-gradient(circle at top right,rgba(201,168,76,.12),transparent 60%);"></div>
+        </div>
+        <div class="overlay"><div><div class="text-xs tracking-widest uppercase text-white/50 mb-1">Portrait</div><div class="font-semibold text-sm" style="font-family:'Archivo',sans-serif;">Mystère Urbain</div></div></div>
+      </div>
+
+      <!-- Mariage tall -->
+      <div class="masonry-item" data-cat="mariage" tabindex="0" role="button" aria-label="Ouvrir Mariage cérémonie" onclick="openLightbox(this)">
+        <div class="img-placeholder" style="height:380px; background:linear-gradient(160deg,#100820 0%,#1a0f35 50%,#0d0820 100%); position:relative;">
+          <div style="position:absolute;bottom:10%;left:50%;transform:translateX(-50%);width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,76,.2),transparent 70%);"></div>
+        </div>
+        <div class="overlay"><div><div class="text-xs tracking-widest uppercase text-white/50 mb-1">Mariage</div><div class="font-semibold text-sm" style="font-family:'Archivo',sans-serif;">Cérémonie Intime</div></div></div>
+      </div>
+
+      <!-- Corporate wide -->
+      <div class="masonry-item" data-cat="corporate" tabindex="0" role="button" aria-label="Ouvrir Corporate event" onclick="openLightbox(this)">
+        <div class="img-placeholder" style="height:200px; background:linear-gradient(90deg,#050505 0%,#101018 50%,#050505 100%); position:relative;">
+          <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(201,168,76,.06),transparent);"></div>
+        </div>
+        <div class="overlay"><div><div class="text-xs tracking-widest uppercase text-white/50 mb-1">Corporate</div><div class="font-semibold text-sm" style="font-family:'Archivo',sans-serif;">Conférence Prestige</div></div></div>
+      </div>
+
+      <!-- Art -->
+      <div class="masonry-item" data-cat="art" tabindex="0" role="button" aria-label="Ouvrir Art abstrait" onclick="openLightbox(this)">
+        <div class="img-placeholder" style="height:280px; background:radial-gradient(ellipse at 50% 50%,#1a1204 0%,#000 70%); position:relative;">
+          <div style="position:absolute;inset:20%;background:radial-gradient(ellipse,rgba(201,168,76,.3),transparent 55%);border-radius:50%;filter:blur(2px);"></div>
+        </div>
+        <div class="overlay"><div><div class="text-xs tracking-widest uppercase text-white/50 mb-1">Art</div><div class="font-semibold text-sm" style="font-family:'Archivo',sans-serif;">Or Primitif</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ SERVICES ═══════════════════════════ -->
+<section id="services" class="py-24 relative z-10">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-16 reveal">
+      <p class="text-[10px] tracking-[.4em] text-white/25 uppercase mb-3">Nos offres</p>
+      <h2 style="font-family:'Archivo',sans-serif; font-size:clamp(2.5rem,5vw,4rem); font-weight:700;">
+        Services &amp; <span class="gold" style="font-weight:300;font-style:italic;">Tarifs</span>
+      </h2>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-5">
+      <!-- Portrait -->
+      <div class="svc-card glass rounded-2xl p-7 border border-white/[.05] reveal" style="transition-delay:.05s">
+        <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-6" style="background:rgba(201,168,76,.1);">
+          <svg class="w-5 h-5" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+        </div>
+        <div class="tag mb-4">Portrait</div>
+        <p class="text-white/40 text-sm leading-relaxed mb-6">Séances individuelles, famille ou couple. Studio ou extérieur, lumière naturelle ou artificielle.</p>
+        <ul class="space-y-3 mb-8 text-sm text-white/50">
+          <li class="flex items-center gap-2"><svg class="w-4 h-4 flex-shrink-0" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>2h de séance</li>
+          <li class="flex items-center gap-2"><svg class="w-4 h-4 flex-shrink-0" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>30 photos retouchées HD</li>
+          <li class="flex items-center gap-2"><svg class="w-4 h-4 flex-shrink-0" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Galerie privée en ligne</li>
+          <li class="flex items-center gap-2"><svg class="w-4 h-4 flex-shrink-0" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Livraison sous 7 jours</li>
+        </ul>
+        <div class="gold-line mb-6"></div>
+        <div class="flex items-center justify-between">
+          <div><span style="font-family:'Archivo',sans-serif; font-size:2.2rem; font-weight:300;" class="gold">150€</span><span class="text-white/25 text-sm"> /séance</span></div>
+          <button onclick="openOrder('Portrait',150)" class="btn-outline text-xs py-2.5 px-4 cursor-pointer">Réserver</button>
+        </div>
+      </div>
+
+      <!-- Mariage — featured -->
+      <div class="svc-card featured glass-gold rounded-2xl p-7 border reveal relative" style="transition-delay:.12s">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2 btn-gold py-1.5 px-5 text-[10px]">Le plus populaire</div>
+        <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-6" style="background:rgba(201,168,76,.15);">
+          <svg class="w-5 h-5" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>
+        </div>
+        <div class="tag mb-4">Mariage</div>
+        <p class="text-white/40 text-sm leading-relaxed mb-6">Couverture complète de votre grand jour, du matin à la fête. Une narration visuelle inoubliable.</p>
+        <ul class="space-y-3 mb-8 text-sm text-white/50">
+          <li class="flex items-center gap-2"><svg class="w-4 h-4 flex-shrink-0" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Journée entière (10h)</li>
+          <li class="flex items-center gap-2"><svg class="w-4 h-4 flex-shrink-0" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>500+ photos retouchées HD</li>
+          <li class="flex items-center gap-2"><svg class="w-4 h-4 flex-shrink-0" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Album premium 30×30</li>
+          <li class="flex items-center gap-2"><svg class="w-4 h-4 flex-shrink-0" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>2 photographes dédiés</li>
+          <li class="flex items-center gap-2"><svg class="w-4 h-4 flex-shrink-0" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Séance engagement offerte</li>
+        </ul>
+        <div class="gold-line mb-6"></div>
+        <div class="flex items-center justify-between">
+          <div><span style="font-family:'Archivo',sans-serif; font-size:2.2rem; font-weight:300;" class="gold">1 800€</span><span class="text-white/25 text-sm"> /jour</span></div>
+          <button onclick="openOrder('Mariage',1800)" class="btn-gold text-xs py-2.5 px-4 cursor-pointer">Réserver</button>
+        </div>
+      </div>
+
+      <!-- Corporate -->
+      <div class="svc-card glass rounded-2xl p-7 border border-white/[.05] reveal" style="transition-delay:.2s">
+        <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-6" style="background:rgba(201,168,76,.1);">
+          <svg class="w-5 h-5" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"/></svg>
+        </div>
+        <div class="tag mb-4">Corporate</div>
+        <p class="text-white/40 text-sm leading-relaxed mb-6">Headshots, photos d'équipe, produits et événements professionnels avec droits commerciaux.</p>
+        <ul class="space-y-3 mb-8 text-sm text-white/50">
+          <li class="flex items-center gap-2"><svg class="w-4 h-4 flex-shrink-0" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>4h de séance</li>
+          <li class="flex items-center gap-2"><svg class="w-4 h-4 flex-shrink-0" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>100 photos retouchées</li>
+          <li class="flex items-center gap-2"><svg class="w-4 h-4 flex-shrink-0" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Droits commerciaux inclus</li>
+          <li class="flex items-center gap-2"><svg class="w-4 h-4 flex-shrink-0" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>Formats web &amp; print</li>
+        </ul>
+        <div class="gold-line mb-6"></div>
+        <div class="flex items-center justify-between">
+          <div><span style="font-family:'Archivo',sans-serif; font-size:2.2rem; font-weight:300;" class="gold">600€</span><span class="text-white/25 text-sm"> /séance</span></div>
+          <button onclick="openOrder('Corporate',600)" class="btn-outline text-xs py-2.5 px-4 cursor-pointer">Réserver</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom quote -->
+    <div class="glass rounded-2xl p-8 mt-8 flex flex-col md:flex-row items-center justify-between gap-6 reveal border border-white/[.05]">
+      <div>
+        <h3 style="font-family:'Archivo',sans-serif; font-size:1.3rem; font-weight:600;" class="mb-2">Un projet sur mesure ?</h3>
+        <p class="text-white/40 text-sm">Immobilier, mode, gastronomie, art… Parlons de votre vision et créons un devis personnalisé.</p>
+      </div>
+      <button onclick="openOrder('Sur devis',0)" class="btn-outline flex-shrink-0 cursor-pointer">
+        Demander un devis
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ PROCESS ═══════════════════════════ -->
+<section id="process" class="py-24 relative z-10">
+  <div class="max-w-5xl mx-auto px-6">
+    <div class="text-center mb-16 reveal">
+      <p class="text-[10px] tracking-[.4em] text-white/25 uppercase mb-3">Comment ça marche</p>
+      <h2 style="font-family:'Archivo',sans-serif; font-size:clamp(2.2rem,4vw,3.5rem); font-weight:700;">
+        De la commande<br/><span class="gold" style="font-weight:300;font-style:italic;">aux images</span>
+      </h2>
+    </div>
+    <div class="grid md:grid-cols-2 gap-6 stagger" id="process-grid">
+      <div class="glass rounded-2xl p-7 border border-white/[.05]">
+        <div class="flex gap-5">
+          <div class="step-dot flex-shrink-0">01</div>
+          <div>
+            <h4 style="font-family:'Archivo',sans-serif; font-weight:600;" class="mb-2">Commande en ligne</h4>
+            <p class="text-white/40 text-sm leading-relaxed">Remplissez notre formulaire de réservation détaillé. Choisissez votre formule, date et lieu. Vous recevrez une confirmation sous 2h.</p>
+          </div>
+        </div>
+      </div>
+      <div class="glass rounded-2xl p-7 border border-white/[.05]">
+        <div class="flex gap-5">
+          <div class="step-dot flex-shrink-0">02</div>
+          <div>
+            <h4 style="font-family:'Archivo',sans-serif; font-weight:600;" class="mb-2">Appel de préparation</h4>
+            <p class="text-white/40 text-sm leading-relaxed">Un photographe vous contacte pour échanger sur vos attentes, le style souhaité et les détails logistiques.</p>
+          </div>
+        </div>
+      </div>
+      <div class="glass rounded-2xl p-7 border border-white/[.05]">
+        <div class="flex gap-5">
+          <div class="step-dot flex-shrink-0">03</div>
+          <div>
+            <h4 style="font-family:'Archivo',sans-serif; font-weight:600;" class="mb-2">La séance</h4>
+            <p class="text-white/40 text-sm leading-relaxed">Votre photographe crée des images d'exception dans un environnement détendu et professionnel. Vous êtes guidé à chaque étape.</p>
+          </div>
+        </div>
+      </div>
+      <div class="glass rounded-2xl p-7 border border-white/[.05]">
+        <div class="flex gap-5">
+          <div class="step-dot flex-shrink-0">04</div>
+          <div>
+            <h4 style="font-family:'Archivo',sans-serif; font-weight:600;" class="mb-2">Livraison &amp; galerie</h4>
+            <p class="text-white/40 text-sm leading-relaxed">Recevez votre galerie privée sous 7 jours. Téléchargez vos images en haute résolution et choisissez vos tirages.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ TESTIMONIALS ═══════════════════════════ -->
+<section class="py-24 relative z-10 overflow-hidden">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-14 reveal">
+      <p class="text-[10px] tracking-[.4em] text-white/25 uppercase mb-3">Avis clients</p>
+      <h2 style="font-family:'Archivo',sans-serif; font-size:clamp(2.2rem,4vw,3.5rem); font-weight:700;">
+        Ils nous font <span class="gold" style="font-weight:300;font-style:italic;">confiance</span>
+      </h2>
+    </div>
+    <div class="relative">
+      <div style="overflow:hidden;" aria-live="polite">
+        <div class="testimonial-track" id="testi-track">
+          <div class="testimonial-card glass rounded-2xl p-7 border border-white/[.06]">
+            <div class="flex gap-1 mb-5" aria-label="5 étoiles">
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </div>
+            <p class="text-white/55 text-sm leading-relaxed mb-6 italic">"Des photos absolument époustouflantes pour notre mariage. Chaque image raconte une histoire et capture une émotion unique. Nous recommandons OBSIDIAN sans hésitation à tous."</p>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm" style="background:rgba(201,168,76,.15);color:#c9a84c">CL</div>
+              <div><div class="text-sm font-medium">Céline &amp; Lucas</div><div class="text-xs text-white/25">Mariage, Château de Versailles · 2025</div></div>
+            </div>
+          </div>
+          <div class="testimonial-card glass rounded-2xl p-7 border border-white/[.06]">
+            <div class="flex gap-1 mb-5" aria-label="5 étoiles">
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </div>
+            <p class="text-white/55 text-sm leading-relaxed mb-6 italic">"Notre shooting corporate a transformé l'image de notre entreprise. Nos headshots LinkedIn ont triplé nos demandes de contact. Professionnalisme et créativité au rendez-vous."</p>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm" style="background:rgba(201,168,76,.15);color:#c9a84c">TM</div>
+              <div><div class="text-sm font-medium">Thomas M.</div><div class="text-xs text-white/25">Corporate · DG, Fintopia — 2025</div></div>
+            </div>
+          </div>
+          <div class="testimonial-card glass rounded-2xl p-7 border border-white/[.06]">
+            <div class="flex gap-1 mb-5" aria-label="5 étoiles">
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </div>
+            <p class="text-white/55 text-sm leading-relaxed mb-6 italic">"Je cherchais un photographe capable de capturer quelque chose de vrai, d'authentique. OBSIDIAN a réussi à faire ressortir une version de moi que je ne savais pas exister."</p>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm" style="background:rgba(201,168,76,.15);color:#c9a84c">SA</div>
+              <div><div class="text-sm font-medium">Sophia A.</div><div class="text-xs text-white/25">Portrait · Artiste — 2025</div></div>
+            </div>
+          </div>
+          <div class="testimonial-card glass rounded-2xl p-7 border border-white/[.06]">
+            <div class="flex gap-1 mb-5" aria-label="5 étoiles">
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              <svg class="w-4 h-4" style="color:#c9a84c" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </div>
+            <p class="text-white/55 text-sm leading-relaxed mb-6 italic">"Nos photos de restaurant sont tellement appétissantes que nos réservations ont augmenté de 40% après la campagne. Un investissement qui se rembourse rapidement !"</p>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm" style="background:rgba(201,168,76,.15);color:#c9a84c">JR</div>
+              <div><div class="text-sm font-medium">Jacques R.</div><div class="text-xs text-white/25">Corporate · Chef étoilé — 2024</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Nav buttons -->
+      <div class="flex justify-center gap-3 mt-8">
+        <button onclick="slideTesti(-1)" class="w-10 h-10 rounded-full glass border border-white/10 flex items-center justify-center cursor-pointer hover:border-white/30 transition-colors" aria-label="Précédent">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+        </button>
+        <button onclick="slideTesti(1)" class="w-10 h-10 rounded-full glass border border-white/10 flex items-center justify-center cursor-pointer hover:border-white/30 transition-colors" aria-label="Suivant">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ CONTACT ═══════════════════════════ -->
+<section id="contact" class="py-24 relative z-10">
+  <div class="max-w-5xl mx-auto px-6">
+    <div class="glass rounded-3xl p-8 md:p-14 border border-white/[.06] reveal" style="background:linear-gradient(135deg,rgba(201,168,76,.04) 0%,rgba(255,255,255,.02) 100%)">
+      <div class="grid md:grid-cols-2 gap-14">
+        <div>
+          <p class="text-[10px] tracking-[.4em] text-white/25 uppercase mb-4">Contactez-nous</p>
+          <h2 style="font-family:'Archivo',sans-serif; font-size:clamp(2rem,4vw,3rem); font-weight:700; line-height:1.1;" class="mb-6">
+            Parlons de<br/><span class="gold" style="font-weight:300;font-style:italic;">votre projet</span>
+          </h2>
+          <p class="text-white/40 text-sm leading-relaxed mb-10">Que vous ayez une idée précise ou simplement l'envie de créer quelque chose d'exceptionnel, nous sommes là pour vous accompagner.</p>
+          <div class="space-y-5">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(201,168,76,.1);">
+                <svg class="w-4 h-4" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+              </div>
+              <div>
+                <div class="text-xs text-white/25 uppercase tracking-widest mb-0.5">Email</div>
+                <div class="text-sm">contact@obsidian-studio.fr</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(201,168,76,.1);">
+                <svg class="w-4 h-4" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
+              </div>
+              <div>
+                <div class="text-xs text-white/25 uppercase tracking-widest mb-0.5">Téléphone</div>
+                <div class="text-sm">+33 1 23 45 67 89</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(201,168,76,.1);">
+                <svg class="w-4 h-4" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+              </div>
+              <div>
+                <div class="text-xs text-white/25 uppercase tracking-widest mb-0.5">Studio</div>
+                <div class="text-sm">12 Rue Oberkampf, Paris 11e</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Quick contact form -->
+        <form id="contact-form" novalidate>
+          <div class="space-y-5">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label for="c-name">Nom *</label>
+                <input type="text" id="c-name" placeholder="Votre nom" required/>
+                <p class="error-msg" id="c-name-err">Requis</p>
+              </div>
+              <div>
+                <label for="c-email">Email *</label>
+                <input type="email" id="c-email" placeholder="email@exemple.fr" required/>
+                <p class="error-msg" id="c-email-err">Email invalide</p>
+              </div>
+            </div>
+            <div>
+              <label for="c-subject">Sujet</label>
+              <input type="text" id="c-subject" placeholder="Demande de devis mariage…"/>
+            </div>
+            <div>
+              <label for="c-msg">Message *</label>
+              <textarea id="c-msg" rows="4" placeholder="Décrivez votre projet…" style="resize:vertical;" required></textarea>
+              <p class="error-msg" id="c-msg-err">Requis</p>
+            </div>
+            <button type="submit" id="contact-btn" class="btn-gold w-full justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.269 20.876L5.999 12zm0 0h7.5"/></svg>
+              Envoyer le message
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ FOOTER ═══════════════════════════ -->
+<footer class="py-16 relative z-10">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="gold-line mb-12"></div>
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 mb-12">
+      <div>
+        <div class="text-2xl font-black tracking-[.2em] uppercase gold mb-2" style="font-family:'Archivo',sans-serif;">OBSIDIAN</div>
+        <p class="text-white/30 text-sm">Studio photographique de luxe · Paris</p>
+      </div>
+      <div class="flex flex-wrap gap-6 text-sm text-white/40">
+        <a href="#portfolio" class="hover:text-white transition-colors cursor-pointer">Portfolio</a>
+        <a href="#services" class="hover:text-white transition-colors cursor-pointer">Services</a>
+        <a href="#process" class="hover:text-white transition-colors cursor-pointer">Processus</a>
+        <a href="#contact" class="hover:text-white transition-colors cursor-pointer">Contact</a>
+      </div>
+    </div>
+    <div class="gold-line mb-8"></div>
+    <div class="flex flex-wrap items-center justify-between gap-4 text-white/20 text-xs">
+      <p>© 2025 OBSIDIAN Studio. Tous droits réservés.</p>
+      <div class="flex gap-5">
+        <a href="#" class="hover:text-white/40 transition-colors cursor-pointer">Mentions légales</a>
+        <a href="#" class="hover:text-white/40 transition-colors cursor-pointer">Confidentialité</a>
+        <a href="#" class="hover:text-white/40 transition-colors cursor-pointer">CGV</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════ FLOATING CTA ═══════════════════════════ -->
+<div id="floating-cta">
+  <button onclick="openOrder()" class="btn-gold shadow-2xl">
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+    Réserver
+  </button>
+</div>
+
+<!-- ═══════════════════════════ LIGHTBOX ═══════════════════════════ -->
+<div id="lightbox" role="dialog" aria-modal="true" aria-label="Aperçu image" onclick="closeLightbox(event)">
+  <button id="lightbox-close" onclick="closeLightbox()" aria-label="Fermer">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+  </button>
+  <div id="lightbox-content" style="min-width:280px;min-height:200px;display:flex;align-items:center;justify-content:center;">
+    <div id="lightbox-img" style="width:600px;max-width:85vw;max-height:85vh;"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ ORDER MODAL (3-step wizard) ═══════════════════════════ -->
+<div id="order-modal" role="dialog" aria-modal="true" aria-label="Commander une séance">
+  <div id="order-box" class="glass-gold rounded-3xl border p-8 md:p-10">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <div class="text-[10px] tracking-[.3em] text-white/25 uppercase mb-1">Commander</div>
+        <h3 style="font-family:'Archivo',sans-serif; font-size:1.5rem; font-weight:700;">Réservation <span class="gold" style="font-weight:300;">OBSIDIAN</span></h3>
+      </div>
+      <button onclick="closeOrder()" class="w-9 h-9 rounded-full glass border border-white/10 flex items-center justify-center cursor-pointer hover:border-white/30 transition-colors" aria-label="Fermer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Step indicators -->
+    <div class="flex items-center gap-3 mb-8" aria-label="Étapes de réservation">
+      <div class="step-indicator active" id="si-1"></div>
+      <div class="h-px flex-1 bg-white/10"></div>
+      <div class="step-indicator" id="si-2"></div>
+      <div class="h-px flex-1 bg-white/10"></div>
+      <div class="step-indicator" id="si-3"></div>
+    </div>
+
+    <!-- Step 1 : Service & Date -->
+    <div class="wizard-step active" id="ws-1">
+      <h4 style="font-family:'Archivo',sans-serif;" class="text-base font-semibold mb-6 text-white/80">Étape 1 — Choisissez votre formule</h4>
+      <div class="grid grid-cols-2 gap-3 mb-6">
+        <button type="button" onclick="selectPkg('Portrait','150')" class="pkg-btn glass rounded-xl p-4 border border-white/[.08] text-left cursor-pointer hover:border-[rgba(201,168,76,.3)] transition-all" data-pkg="Portrait">
+          <div class="text-xs text-white/40 tracking-widest uppercase mb-1">Portrait</div>
+          <div class="font-bold text-lg gold" style="font-family:'Archivo',sans-serif;">150€</div>
+          <div class="text-xs text-white/30 mt-1">2h · 30 photos</div>
+        </button>
+        <button type="button" onclick="selectPkg('Mariage','1800')" class="pkg-btn glass rounded-xl p-4 border border-white/[.08] text-left cursor-pointer hover:border-[rgba(201,168,76,.3)] transition-all" data-pkg="Mariage">
+          <div class="text-xs text-white/40 tracking-widest uppercase mb-1">Mariage</div>
+          <div class="font-bold text-lg gold" style="font-family:'Archivo',sans-serif;">1 800€</div>
+          <div class="text-xs text-white/30 mt-1">10h · 500+ photos</div>
+        </button>
+        <button type="button" onclick="selectPkg('Corporate','600')" class="pkg-btn glass rounded-xl p-4 border border-white/[.08] text-left cursor-pointer hover:border-[rgba(201,168,76,.3)] transition-all" data-pkg="Corporate">
+          <div class="text-xs text-white/40 tracking-widest uppercase mb-1">Corporate</div>
+          <div class="font-bold text-lg gold" style="font-family:'Archivo',sans-serif;">600€</div>
+          <div class="text-xs text-white/30 mt-1">4h · 100 photos</div>
+        </button>
+        <button type="button" onclick="selectPkg('Sur devis','0')" class="pkg-btn glass rounded-xl p-4 border border-white/[.08] text-left cursor-pointer hover:border-[rgba(201,168,76,.3)] transition-all" data-pkg="Sur devis">
+          <div class="text-xs text-white/40 tracking-widest uppercase mb-1">Sur devis</div>
+          <div class="font-bold text-lg text-white/60" style="font-family:'Archivo',sans-serif;">Personnalisé</div>
+          <div class="text-xs text-white/30 mt-1">Mode, immobilier…</div>
+        </button>
+      </div>
+      <div class="grid grid-cols-2 gap-4 mb-6">
+        <div>
+          <label for="o-date">Date souhaitée *</label>
+          <input type="date" id="o-date" required/>
+          <p class="error-msg" id="o-date-err">Requis</p>
+        </div>
+        <div>
+          <label for="o-time">Heure préférée</label>
+          <select id="o-time">
+            <option value="">Flexible</option>
+            <option>Matin (8h–12h)</option>
+            <option>Après-midi (14h–18h)</option>
+            <option>Soirée (18h–21h)</option>
+          </select>
+        </div>
+      </div>
+      <div class="mb-6">
+        <label for="o-location">Lieu envisagé</label>
+        <input type="text" id="o-location" placeholder="Studio, extérieur, adresse…"/>
+      </div>
+      <button onclick="goStep(2)" class="btn-gold w-full justify-center">
+        Étape suivante
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3"/></svg>
+      </button>
+    </div>
+
+    <!-- Step 2 : Options & Details -->
+    <div class="wizard-step" id="ws-2">
+      <h4 style="font-family:'Archivo',sans-serif;" class="text-base font-semibold mb-6 text-white/80">Étape 2 — Options &amp; détails</h4>
+      <div class="glass rounded-xl p-5 border border-white/[.06] mb-6">
+        <p class="text-xs text-white/30 uppercase tracking-widest mb-4">Options complémentaires</p>
+        <div class="space-y-3">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" name="opt-album" id="opt-album" class="w-4 h-4"/>
+            <div><div class="text-sm">Album photo premium 30×30 <span class="text-white/30">(+80€)</span></div><div class="text-xs text-white/25">Impression haut de gamme, reliure cuir</div></div>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" name="opt-video" id="opt-video" class="w-4 h-4"/>
+            <div><div class="text-sm">Making-of vidéo <span class="text-white/30">(+120€)</span></div><div class="text-xs text-white/25">Réel Instagram / courts-métrages</div></div>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" name="opt-print" id="opt-print" class="w-4 h-4"/>
+            <div><div class="text-sm">Tirages d'art (set de 5) <span class="text-white/30">(+150€)</span></div><div class="text-xs text-white/25">Papier Fine Art 300g, format 40×50cm</div></div>
+          </label>
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" name="opt-rush" id="opt-rush" class="w-4 h-4"/>
+            <div><div class="text-sm">Livraison express 48h <span class="text-white/30">(+50€)</span></div><div class="text-xs text-white/25">Retouches prioritaires</div></div>
+          </label>
+        </div>
+      </div>
+      <div class="mb-6">
+        <label for="o-style">Style souhaité</label>
+        <select id="o-style">
+          <option value="">Laissez-moi guider</option>
+          <option>Naturel et lumineux</option>
+          <option>Dramatique et contrasté</option>
+          <option>Cinématographique sombre</option>
+          <option>Vintage / Film argentique</option>
+          <option>Minimaliste épuré</option>
+        </select>
+      </div>
+      <div class="mb-6">
+        <label for="o-notes">Précisions / Inspirations</label>
+        <textarea id="o-notes" rows="3" placeholder="Références, ambiance, nombre de personnes, contraintes particulières…" style="resize:vertical;"></textarea>
+      </div>
+      <div class="flex gap-3">
+        <button onclick="goStep(1)" class="btn-outline flex-1 justify-center cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18"/></svg>
+          Retour
+        </button>
+        <button onclick="goStep(3)" class="btn-gold flex-1 justify-center cursor-pointer">
+          Continuer
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 3 : Contact & Confirm -->
+    <div class="wizard-step" id="ws-3">
+      <h4 style="font-family:'Archivo',sans-serif;" class="text-base font-semibold mb-6 text-white/80">Étape 3 — Vos coordonnées</h4>
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label for="o-fname">Prénom *</label>
+          <input type="text" id="o-fname" placeholder="Jean" required/>
+          <p class="error-msg" id="o-fname-err">Requis</p>
+        </div>
+        <div>
+          <label for="o-lname">Nom *</label>
+          <input type="text" id="o-lname" placeholder="Dupont" required/>
+          <p class="error-msg" id="o-lname-err">Requis</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <label for="o-email">Email *</label>
+          <input type="email" id="o-email" placeholder="email@exemple.fr" required/>
+          <p class="error-msg" id="o-email-err">Email invalide</p>
+        </div>
+        <div>
+          <label for="o-phone">Téléphone</label>
+          <input type="tel" id="o-phone" placeholder="+33 6 …" autocomplete="tel"/>
+        </div>
+      </div>
+
+      <!-- Order summary -->
+      <div class="glass rounded-xl p-5 border border-white/[.06] mb-6">
+        <p class="text-xs text-white/25 uppercase tracking-widest mb-3">Récapitulatif</p>
+        <div class="flex justify-between text-sm mb-2">
+          <span class="text-white/60">Formule</span>
+          <span id="sum-pkg" class="font-medium">—</span>
+        </div>
+        <div class="flex justify-between text-sm mb-2">
+          <span class="text-white/60">Date</span>
+          <span id="sum-date" class="font-medium">—</span>
+        </div>
+        <div class="flex justify-between text-sm mb-2" id="sum-opts-row" style="display:none!important">
+          <span class="text-white/60">Options</span>
+          <span id="sum-opts" class="font-medium text-white/60">—</span>
+        </div>
+        <div class="gold-line my-3"></div>
+        <div class="flex justify-between">
+          <span class="text-sm font-semibold">Total estimé</span>
+          <span id="sum-total" class="font-bold text-lg gold" style="font-family:'Archivo',sans-serif;">—</span>
+        </div>
+      </div>
+
+      <label class="flex items-start gap-3 cursor-pointer mb-6">
+        <input type="checkbox" id="o-cgv" class="w-4 h-4 mt-0.5"/>
+        <span class="text-xs text-white/40">J'accepte les <a href="#" class="text-white/60 underline">conditions générales de vente</a> et la <a href="#" class="text-white/60 underline">politique de confidentialité</a>.</span>
+      </label>
+
+      <div class="flex gap-3">
+        <button onclick="goStep(2)" class="btn-outline flex-shrink-0 cursor-pointer py-4 px-5" aria-label="Retour">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18"/></svg>
+        </button>
+        <button onclick="submitOrder()" id="order-submit-btn" class="btn-gold flex-1 justify-center">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Confirmer la commande
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ TOAST ═══════════════════════════ -->
+<div id="toast" role="alert" aria-live="assertive">
+  <div class="glass-gold rounded-2xl px-6 py-4 border border-[rgba(201,168,76,.3)] flex items-center gap-3">
+    <svg class="w-5 h-5 flex-shrink-0" style="color:#c9a84c" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    <div>
+      <div id="toast-title" class="text-sm font-semibold"></div>
+      <div id="toast-body" class="text-xs text-white/50 mt-0.5"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ JS ═══════════════════════════ -->
+<script>
+/* ── Cursor ── */
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+function animateRing(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animateRing);}
+animateRing();
+document.querySelectorAll('a,button,[role="button"]').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ring.style.width='60px';ring.style.height='60px';ring.style.borderColor='rgba(201,168,76,.6)';});
+  el.addEventListener('mouseleave',()=>{ring.style.width='36px';ring.style.height='36px';ring.style.borderColor='rgba(255,255,255,.4)';});
+});
+
+/* ── Progress bar ── */
+const prog = document.getElementById('progress');
+window.addEventListener('scroll',()=>{
+  const h=document.documentElement.scrollHeight-window.innerHeight;
+  prog.style.width=(window.scrollY/h*100)+'%';
+},{ passive:true });
+
+/* ── Parallax ── */
+window.addEventListener('scroll',()=>{
+  const sy=window.scrollY;
+  document.querySelectorAll('.parallax-layer').forEach(el=>{
+    const sp=parseFloat(el.dataset.speed||0.3);
+    el.style.transform=`translateY(${sy*sp}px)`;
+  });
+},{ passive:true });
+
+/* ── Reveal on scroll ── */
+const revObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');revObs.unobserve(e.target);}});
+},{threshold:.1});
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.stagger').forEach(el=>revObs.observe(el));
+
+/* ── Counter animation ── */
+function animateCount(el,target){
+  let start=0; const dur=1800; const step=16;
+  const inc=target/(dur/step);
+  const t=setInterval(()=>{
+    start=Math.min(start+inc,target);
+    el.textContent=Math.floor(start).toLocaleString('fr-FR');
+    if(start>=target)clearInterval(t);
+  },step);
+}
+const statsObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('[data-count]').forEach(el=>{
+        animateCount(el,parseInt(el.dataset.count));
+      });
+      statsObs.unobserve(e.target);
+    }
+  });
+},{threshold:.3});
+statsObs.observe(document.getElementById('stats-grid'));
+
+/* ── Mobile menu ── */
+const menuBtn=document.getElementById('menu-btn');
+const mobileNav=document.getElementById('mobile-nav');
+menuBtn.addEventListener('click',()=>{
+  const open=mobileNav.classList.toggle('open');
+  menuBtn.setAttribute('aria-expanded',open);
+});
+mobileNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{mobileNav.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');}));
+
+/* ── Navbar scroll ── */
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>50);
+  document.getElementById('floating-cta').classList.toggle('show',window.scrollY>600);
+},{ passive:true });
+
+/* ── Portfolio filter ── */
+function filter(cat,btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>{
+    b.style.background='transparent';
+    b.style.borderColor='rgba(255,255,255,.1)';
+    b.style.color='rgba(255,255,255,.6)';
+  });
+  btn.style.borderColor='rgba(201,168,76,.5)';
+  btn.style.background='rgba(201,168,76,.08)';
+  btn.style.color='#c9a84c';
+  document.querySelectorAll('#masonry .masonry-item').forEach(card=>{
+    const show=cat==='all'||card.dataset.cat===cat;
+    card.style.display=show?'':'none';
+    card.style.opacity=show?'1':'0';
+  });
+}
+// keyboard support for masonry
+document.querySelectorAll('.masonry-item').forEach(el=>{
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openLightbox(el);}});
+});
+
+/* ── Lightbox ── */
+function openLightbox(el){
+  const lb=document.getElementById('lightbox');
+  const src=el.querySelector('.img-placeholder').innerHTML;
+  document.getElementById('lightbox-img').innerHTML=el.querySelector('.img-placeholder').outerHTML;
+  document.getElementById('lightbox-img').style.cssText='width:600px;max-width:85vw;max-height:85vh;border-radius:12px;overflow:hidden;';
+  lb.classList.add('open');
+  lb.focus();
+  document.body.style.overflow='hidden';
+}
+function closeLightbox(e){
+  if(!e||e.target===document.getElementById('lightbox')||e.target===document.getElementById('lightbox-close')||e.target.closest('#lightbox-close')){
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow='';
+  }
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){closeLightbox({target:document.getElementById('lightbox')});closeOrder();} });
+
+/* ── Testimonials carousel ── */
+let testiIdx=0;
+const track=document.getElementById('testi-track');
+const cardW=()=>document.querySelector('.testimonial-card').offsetWidth+20;
+function slideTesti(dir){
+  const cards=document.querySelectorAll('.testimonial-card');
+  testiIdx=Math.max(0,Math.min(testiIdx+dir,cards.length-1));
+  track.style.transform=`translateX(-${testiIdx*cardW()}px)`;
+}
+
+/* ── Order modal ── */
+let currentStep=1;
+let selectedPkg='';
+let selectedPrice=0;
+
+function openOrder(pkg,price){
+  const modal=document.getElementById('order-modal');
+  modal.classList.add('open');
+  document.body.style.overflow='hidden';
+  if(pkg){selectPkg(pkg,String(price||0));}
+  // set min date
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('o-date').min=today;
+  goStep(1);
+}
+function closeOrder(){
+  document.getElementById('order-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.getElementById('order-modal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('order-modal')) closeOrder();
+});
+
+function selectPkg(name,price){
+  selectedPkg=name;
+  selectedPrice=parseInt(price||0);
+  document.querySelectorAll('.pkg-btn').forEach(b=>{
+    b.style.borderColor=b.dataset.pkg===name?'rgba(201,168,76,.5)':'rgba(255,255,255,.08)';
+    b.style.background=b.dataset.pkg===name?'rgba(201,168,76,.08)':'';
+  });
+  // pre-select in step1 dropdown
+  document.getElementById('o-date').focus();
+}
+
+function goStep(n){
+  if(n===2){
+    const date=document.getElementById('o-date');
+    if(!date.value){date.classList.add('input-error');document.getElementById('o-date-err').classList.add('show');return;}
+    date.classList.remove('input-error');document.getElementById('o-date-err').classList.remove('show');
+    if(!selectedPkg){showToast('Choisissez une formule','Sélectionnez Portrait, Mariage, Corporate ou Sur devis.');return;}
+  }
+  if(n===3) updateSummary();
+  currentStep=n;
+  document.querySelectorAll('.wizard-step').forEach((s,i)=>s.classList.toggle('active',i===n-1));
+  // Update step indicators
+  for(let i=1;i<=3;i++){
+    const si=document.getElementById('si-'+i);
+    if(i<n){si.classList.add('done');si.classList.remove('active');}
+    else if(i===n){si.classList.remove('done');si.classList.add('active');}
+    else{si.classList.remove('done','active');}
+  }
+  document.getElementById('order-box').scrollTop=0;
+}
+
+function updateSummary(){
+  document.getElementById('sum-pkg').textContent=selectedPkg||'—';
+  const dateVal=document.getElementById('o-date').value;
+  document.getElementById('sum-date').textContent=dateVal?new Date(dateVal+'T00:00:00').toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}):'—';
+  let extra=0;
+  if(document.getElementById('opt-album').checked) extra+=80;
+  if(document.getElementById('opt-video').checked) extra+=120;
+  if(document.getElementById('opt-print').checked) extra+=150;
+  if(document.getElementById('opt-rush').checked) extra+=50;
+  const total=selectedPrice+extra;
+  const totalStr=selectedPkg==='Sur devis'?'Sur devis':total.toLocaleString('fr-FR')+'€';
+  document.getElementById('sum-total').textContent=totalStr;
+}
+
+async function submitOrder(){
+  const fields=[
+    {id:'o-fname',errId:'o-fname-err',check:v=>v.trim().length>0},
+    {id:'o-lname',errId:'o-lname-err',check:v=>v.trim().length>0},
+    {id:'o-email',errId:'o-email-err',check:v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)},
+  ];
+  let ok=true;
+  fields.forEach(({id,errId,check})=>{
+    const el=document.getElementById(id);
+    const errEl=document.getElementById(errId);
+    if(!check(el.value)){ok=false;el.classList.add('input-error');errEl.classList.add('show');}
+    else{el.classList.remove('input-error');errEl.classList.remove('show');}
+  });
+  if(!document.getElementById('o-cgv').checked){showToast('CGV requises','Veuillez accepter nos conditions générales.');return;}
+  if(!ok) return;
+
+  const btn=document.getElementById('order-submit-btn');
+  btn.disabled=true;
+  btn.innerHTML='<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg> Traitement…';
+  await new Promise(r=>setTimeout(r,2000));
+  btn.disabled=false;
+  btn.innerHTML='<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Confirmer la commande';
+  closeOrder();
+  showToast('Commande confirmée !','Vous recevrez un email de confirmation sous 2h.');
+}
+
+/* ── Contact form ── */
+document.getElementById('contact-form').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const fields=[
+    {id:'c-name',errId:'c-name-err',check:v=>v.trim().length>0},
+    {id:'c-email',errId:'c-email-err',check:v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)},
+    {id:'c-msg',errId:'c-msg-err',check:v=>v.trim().length>0},
+  ];
+  let ok=true;
+  fields.forEach(({id,errId,check})=>{
+    const el=document.getElementById(id);
+    const errEl=document.getElementById(errId);
+    if(!check(el.value)){ok=false;el.classList.add('input-error');errEl.classList.add('show');}
+    else{el.classList.remove('input-error');errEl.classList.remove('show');}
+  });
+  if(!ok) return;
+  const btn=document.getElementById('contact-btn');
+  btn.disabled=true;
+  btn.innerHTML='<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg> Envoi…';
+  await new Promise(r=>setTimeout(r,1500));
+  btn.disabled=false;
+  btn.innerHTML='<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.269 20.876L5.999 12zm0 0h7.5"/></svg> Envoyer le message';
+  e.target.reset();
+  showToast('Message envoyé !','Nous vous répondrons sous 24h.');
+});
+
+/* ── Toast ── */
+function showToast(title,body){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-title').textContent=title;
+  document.getElementById('toast-body').textContent=body;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),4000);
+}
+</script>
+</body>
+</html>
